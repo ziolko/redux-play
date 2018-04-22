@@ -19,7 +19,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var PLAY_HOT_RELOAD = exports.PLAY_HOT_RELOAD = "PLAY_HOT_RELOAD";
 
-var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMiddleware(initialPlaysObject) {
+var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMiddleware(initialPlaysObject, context) {
   var playDefinitions = new Map(Object.entries((0, _flat2.default)(initialPlaysObject)));
   var runningPlayInstances = new Set();
 
@@ -46,7 +46,7 @@ var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMid
 
           runningPlayInstances.add(playInstance);
 
-          var playResult = playFunction(action, (0, _storeProxy2.default)(playInstance, store));
+          var playResult = playFunction(action, (0, _storeProxy2.default)(playInstance, store), context);
 
           Promise.resolve(playResult).finally(function () {
             playInstance.isDone = true;
