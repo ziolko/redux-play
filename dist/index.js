@@ -19,7 +19,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var PLAY_HOT_RELOAD = exports.PLAY_HOT_RELOAD = "PLAY_HOT_RELOAD";
 
-var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMiddleware(initialPlaysObject, context) {
+var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMiddleware(initialPlaysObject) {
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      context = _ref.context,
+      errorHandler = _ref.errorHandler;
+
   var playDefinitions = new Map(Object.entries((0, _flat2.default)(initialPlaysObject)));
   var runningPlayInstances = new Set();
 
@@ -48,7 +52,7 @@ var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMid
 
           var playResult = playFunction(action, (0, _storeProxy2.default)(playInstance, store), context);
 
-          Promise.resolve(playResult).finally(function () {
+          Promise.resolve(playResult).then(null, errorHandler).finally(function () {
             playInstance.isDone = true;
             runningPlayInstances.delete(playInstance);
           });
@@ -66,8 +70,6 @@ var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMid
 
     // Give plays a chance to finish before performing replace
     setTimeout(function () {
-      var _console;
-
       var newPlayDefinitions = new Map(Object.entries((0, _flat2.default)(newPlaysObject)));
 
       var playNames = Array.from(new Set([].concat(_toConsumableArray(playDefinitions.keys()), _toConsumableArray(newPlayDefinitions.keys()))));
@@ -80,11 +82,14 @@ var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMid
       var _iteratorError = undefined;
 
       try {
-        for (var _iterator = runningPlayInstances[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var instance = _step.value;
+        for (var _iterator = alteredPlays[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var playName = _step.value;
 
-          if (alteredPlays.includes(instance.playName)) {
-            console.warn("Play \"" + instance.playName + "\" is running and cannot be hot reloaded - refreshing");
+          var oldDefinition = playDefinitions[playName];
+          var newDefinition = newPlayDefinitions[playName];
+
+          if (oldDefinition && oldDefinition.hotReload === false || newDefinition && newDefinition.hotReload === false) {
+            console.warn("Play \"" + playName + "\" is marked as incapable of hot reloading - refreshing");
             window.location.reload();
             return;
           }
@@ -104,11 +109,44 @@ var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMid
         }
       }
 
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = runningPlayInstances[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var instance = _step2.value;
+
+          if (alteredPlays.includes(instance.playName)) {
+            console.warn("Play \"" + instance.playName + "\" is running and cannot be hot reloaded - refreshing");
+            window.location.reload();
+            return;
+          }
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+
       playDefinitions = newPlayDefinitions;
 
-      (_console = console).warn.apply(_console, ["Hot reloaded " + alteredPlays.length + " play(s):"].concat(_toConsumableArray(alteredPlays.map(function (name) {
-        return "\n - " + name;
-      }))));
+      if (alteredPlays.length) {
+        var _console;
+
+        (_console = console).warn.apply(_console, ["Hot reloaded " + alteredPlays.length + " play(s):"].concat(_toConsumableArray(alteredPlays.map(function (name) {
+          return "\n - " + name;
+        }))));
+      }
     }, 4);
   };
 
