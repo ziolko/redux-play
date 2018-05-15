@@ -50,9 +50,11 @@ var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMid
 
           runningPlayInstances.add(playInstance);
 
-          var playResult = playFunction(action, (0, _storeProxy2.default)(playInstance, store), context);
-
-          Promise.resolve(playResult).then(null, errorHandler).finally(function () {
+          Promise.resolve().then(function () {
+            return playFunction(action, (0, _storeProxy2.default)(playInstance, store), context);
+          }).then(null, errorHandler).then(null, function (error) {
+            return console.error(error);
+          }).finally(function () {
             playInstance.isDone = true;
             runningPlayInstances.delete(playInstance);
           });
