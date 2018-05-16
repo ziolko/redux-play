@@ -87,8 +87,8 @@ var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMid
         for (var _iterator = alteredPlays[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var playName = _step.value;
 
-          var oldDefinition = playDefinitions[playName];
-          var newDefinition = newPlayDefinitions[playName];
+          var oldDefinition = playDefinitions.get(playName);
+          var newDefinition = newPlayDefinitions.get(playName);
 
           if (oldDefinition && oldDefinition.hotReload === false || newDefinition && newDefinition.hotReload === false) {
             console.warn("Play \"" + playName + "\" is marked as incapable of hot reloading - refreshing");
