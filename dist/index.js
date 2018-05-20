@@ -50,14 +50,16 @@ var createPlayMiddleware = exports.createPlayMiddleware = function createPlayMid
 
           runningPlayInstances.add(playInstance);
 
+          function done() {
+            playInstance.isDone = true;
+            runningPlayInstances.delete(playInstance);
+          }
+
           Promise.resolve().then(function () {
             return playFunction(action, (0, _storeProxy2.default)(playInstance, store), context);
           }).then(null, errorHandler).then(null, function (error) {
             return console.error(error);
-          }).finally(function () {
-            playInstance.isDone = true;
-            runningPlayInstances.delete(playInstance);
-          });
+          }).then(done, done); // Promise.finally is not available in older browsers
         });
       };
     };
