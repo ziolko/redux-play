@@ -8,7 +8,7 @@ npm i --save redux-play
 redux-play organizes side effects in so called *plays* - functions called
 every time an action is dispatched. The *play* listed below logs type of
 every dispatched action:
-```
+```js
 async function logger(action) {
   console.info("[action]", action.type);
 }
@@ -16,7 +16,7 @@ async function logger(action) {
 
 Assuming this function is exported from a fille called `plays.js` you can register 
 it in redux-play with the following lines of code:
-```
+```js
 import { createStore, applyMiddleware } from "redux";
 import { createPlayMiddleware } from "redux-play";
 
@@ -27,11 +27,14 @@ const playMiddleware = createPlayMiddleware(rootPlay);
 const store = createStore(rootReducer, applyMiddleware(playMiddleware));
 ```  
 
+Check out 
+[this repository](https://github.com/ziolko/roombelt/blob/master/src/apps/device/store/index.js)
+for an example on how to setup redux-play with hot reload. 
+
 ## How it works
 
 *Plays* are called after reducers (like in redux-observable). They are 
-asynchronous function that have signature `async playFunction(action, store)`.
-
+asynchronous functions that have signature `async playFunction(action, store)`.
 First parameter is the dispatched action. Second parameter is an object with 
 the following methods:
 - `getState()` - returns current state from redux
@@ -47,7 +50,7 @@ The *play* below handles action of type `FETCH_VIDEO_DETAILS`. The result
 is only relevant if no other `FETCH_VIDEO_DETAILS` action has been dispatched.
  
 
-```
+```js
 import { FETCH_VIDEO_DETAILS, SAVE_VIDEO_DETAILS } from "./actions";
 
 async function fetchVideoDetails(action, store) {
